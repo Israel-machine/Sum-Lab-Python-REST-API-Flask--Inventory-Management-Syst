@@ -1,12 +1,16 @@
-
-from flask import Flask, requests, jsonify
-from data import products  # Import from the neutral data file
+from flask import Flask, request, jsonify
+import requests
+import sys
+import os
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+from lib.data import products
+from utils.io_file import save_data, load_data
 import random
 
 #----APP INIT----
 app = Flask(__name__)
 
-
+load_data()
 #Event Class:
 class Product:
     def __init__(self, name, brands, price):
@@ -56,6 +60,7 @@ def fetch_and_add_product(barcode):
             "price": 0.0  # Set a default price
         }
         products.append(new_product)
+        save_data()
         return jsonify(new_product), 201
     
     return jsonify({"error": "Product not found in OpenFoodFacts"}), 404
@@ -82,7 +87,7 @@ def create_event():
     new_obj = Product(name=data["name"], brands=data["brands"], price=data["price"])
     new_product_dict = new_obj.to_dict()
     products.append(new_product_dict) 
-    
+    save_data()
     return jsonify(new_product_dict), 201
 
 # PATCH /inventory/<id> → Update an item
@@ -94,8 +99,10 @@ def update_product(id):#uses id from URL parameter
         return jsonify({"error": "Product not found"}), 404
     if "name" in data:
         product["name"] = data["name"]
+        save_data()
     if "price" in data:
         product["price"] = data["price"]
+        save_data()
     return jsonify(product), 200
 
 # DELETE /inventory/<id> → Remove an item
@@ -105,6 +112,7 @@ def delete_product(id):
     if not product:
         return jsonify({"error": "Product not found"}), 404
     products[:] = [p for p in products if p["product"]["id"] != id]
+    save_data()
     return "", 204
 
 
