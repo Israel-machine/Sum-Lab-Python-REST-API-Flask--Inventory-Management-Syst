@@ -23,13 +23,12 @@ def main():
     del_parser = subparsers.add_parser("delete", help="Delete a product")
     del_parser.add_argument("--id", required=True, help="Product ID/Barcode")
 
-    ### Edit/Update a product
+    # Edit/Update a product
     edit_parser = subparsers.add_parser("edit", help="Edit an existing product")
     edit_parser.add_argument("--id", required=True, help="The Code/ID of the product to edit")
     edit_parser.add_argument("--name", help="New name for the product")
     edit_parser.add_argument("--price", type=float, help="New price for the product")
 
-    ##New Parse added##
     fetch_parser = subparsers.add_parser("fetch", help="Fetch product details via barcode")
     fetch_parser.add_argument("--barcode", required=True, help="The barcode to search")
 
@@ -67,9 +66,8 @@ def main():
         else:
             console.print(f"[red]Error: Product not found.[/red]")
 
-    ##update
+    #update
     elif args.command == "edit":
-        # We only send the data the user actually provided
         payload = {}
         if args.name:
             payload["name"] = args.name
@@ -90,7 +88,6 @@ def main():
             error = response.json().get("error", "Product not found")
             console.print(f"[red]Error:[/red] {error}")
 
-    ##New ELIF
     elif args.command == "fetch":
         response = requests.post(f"{BASE_URL}/fetch/{args.barcode}")
         if response.status_code == 201:

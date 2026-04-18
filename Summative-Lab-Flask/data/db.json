@@ -97,5 +97,32 @@
         "name": "Test Jam",
         "brands": "Test Brand",
         "price": 4.5
+    },
+    {
+        "code": "80545218371523",
+        "product": {
+            "id": "80545218371523"
+        },
+        "name": "Test Jam",
+        "brands": "Test Brand",
+        "price": 4.5
+    },
+    {
+        "code": "20136366257629",
+        "product": {
+            "id": "20136366257629"
+        },
+        "name": "Dynamic Apple",
+        "brands": "Nature",
+        "price": 0.99
+    },
+    {
+        "code": "63169234208543",
+        "product": {
+            "id": "63169234208543"
+        },
+        "name": "Refactored Name",
+        "brands": "BrandX",
+        "price": 5.5
     }
 ]

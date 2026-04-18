@@ -7,7 +7,6 @@ DB_PATH = "data/db.json"
 def save_data():
     """Writes the current products list to a JSON file."""
     try:
-        # Ensure the 'data' folder exists
         os.makedirs(os.path.dirname(DB_PATH), exist_ok=True)
         
         with open(DB_PATH, "w") as f:
@@ -26,7 +25,6 @@ def load_data():
             content = f.read()
             if content:
                 loaded_products = json.loads(content)
-                # Clear the default products and replace with saved ones
                 products.clear()
                 products.extend(loaded_products)
     except Exception as e:

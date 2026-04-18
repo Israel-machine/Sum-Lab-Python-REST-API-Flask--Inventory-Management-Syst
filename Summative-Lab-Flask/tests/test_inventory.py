@@ -7,34 +7,53 @@ class TestInventory(unittest.TestCase):
         self.client.testing = True
 
     def test_get_inventory(self):
-        """Feature: View Inventory"""
+        """Scenario: View Inventory (Dynamic)"""
         res = self.client.get("/inventory")
         self.assertEqual(res.status_code, 200)
         self.assertIsInstance(res.json, list)
 
     def test_create_product(self):
-        """Feature: Manual Add"""
-        payload = {"name": "Test Jam", "brands": "Test Brand", "price": 4.50}
+        """Scenario: Manual Add (Dynamic)"""
+        payload = {"name": "Dynamic Apple", "brands": "Nature", "price": 0.99}
         res = self.client.post("/inventory", json=payload)
         self.assertEqual(res.status_code, 201)
-        self.assertEqual(res.json['name'], "Test Jam")
+        self.assertEqual(res.json['name'], "Dynamic Apple")
+        self.assertIn('code', res.json) # Verify a code was generated automatically
 
     def test_update_product(self):
-        """Feature: Edit/Update Item (CRUD - Patch)"""
-        payload = {"name": "Updated Coke", "price": 3.00}
-        res = self.client.patch("/inventory/5449000000996", json=payload)
+        """Scenario: Edit/Update Item (Dynamic)"""
+        create_res = self.client.post("/inventory", json={
+            "name": "Original Name", 
+            "brands": "BrandX", 
+            "price": 1.0
+        })
+        item_id = create_res.json['code']
+        patch_payload = {"name": "Refactored Name", "price": 5.50}
+        res = self.client.patch(f"/inventory/{item_id}", json=patch_payload)
         self.assertEqual(res.status_code, 200)
-        self.assertEqual(res.json['name'], "Updated Coke")
+        self.assertEqual(res.json['name'], "Refactored Name")
+        self.assertEqual(res.json['price'], 5.50)
 
     def test_delete_product(self):
-        """Feature: Delete Item"""
-        res = self.client.delete("/inventory/3274080005003")
+        """Scenario: Delete Item (Dynamic)"""
+        create_res = self.client.post("/inventory", json={
+            "name": "Ephemeral Item", 
+            "brands": "None", 
+            "price": 0.0
+        })
+        item_id = create_res.json['code']
+        res = self.client.delete(f"/inventory/{item_id}")
         self.assertEqual(res.status_code, 204)
+        check_res = self.client.get(f"/inventory/{item_id}")
+        self.assertEqual(check_res.status_code, 404)
 
     def test_fetch_external_api(self):
-        """Feature: External API Integration (OpenFoodFacts)"""
-        res = self.client.post("/inventory/fetch/3017620422003")
+        """Scenario: External API Integration (Dynamic)"""
+        barcode = "3017620422003"
+        res = self.client.post(f"/inventory/fetch/{barcode}")
         self.assertIn(res.status_code, [201, 400])
+        if res.status_code == 201:
+            self.assertEqual(res.json['code'], barcode)
 
 if __name__ == "__main__":
     unittest.main()

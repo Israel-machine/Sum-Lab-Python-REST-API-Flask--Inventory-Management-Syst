@@ -19,7 +19,7 @@ class Product:
         self.brands = brands
         self.price = price
 
-    def to_dict(self): #convert to dictionary for json use
+    def to_dict(self):
         return {
             "code": self.code,
             "product": {"id": self.code},
@@ -57,7 +57,7 @@ def fetch_and_add_product(barcode):
             "product": {"id": barcode},
             "name": external_data["name"],
             "brands": external_data["brands"],
-            "price": 0.0  # Set a default price
+            "price": 0.0  
         }
         products.append(new_product)
         save_data()
@@ -68,13 +68,13 @@ def fetch_and_add_product(barcode):
 #---RESTFUL ROUTES----:
 # GET /inventory → Fetch all items
 @app.route("/inventory", methods=["GET"])
-def get_products():#take all products in products list and turn into dict. versio of themselves
+def get_products():
     return jsonify(products), 200
 
 # GET /inventory/<id> → Fetch a single item
 @app.route("/inventory/<id>", methods=["GET"])
 def get_event(id):
-    product = next((p for p in products if p["product"]["id"] == id ), None) #WHAT IS THIS?
+    product = next((p for p in products if p["product"]["id"] == id ), None)
     if product:
         return jsonify(product), 200
     else:
@@ -83,7 +83,7 @@ def get_event(id):
 # POST /inventory → Add a new item
 @app.route("/inventory", methods=["POST"])
 def create_event():
-    data = request.get_json() #will grab body of data
+    data = request.get_json() 
     new_obj = Product(name=data["name"], brands=data["brands"], price=data["price"])
     new_product_dict = new_obj.to_dict()
     products.append(new_product_dict) 
@@ -92,10 +92,10 @@ def create_event():
 
 # PATCH /inventory/<id> → Update an item
 @app.route("/inventory/<id>", methods=["PATCH"])
-def update_product(id):#uses id from URL parameter
-    data = request.get_json() #grab data that user sent, will manipulate "title"
-    product = next((p for p in products if p["product"]["id"] == id), None) #grab event using id passed in
-    if not product: #checks if event exists
+def update_product(id):
+    data = request.get_json() 
+    product = next((p for p in products if p["product"]["id"] == id), None) 
+    if not product: 
         return jsonify({"error": "Product not found"}), 404
     if "name" in data:
         product["name"] = data["name"]
