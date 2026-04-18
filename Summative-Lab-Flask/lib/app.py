@@ -1,8 +1,7 @@
-from flask import Flask, request, jsonify, requests
+
+from flask import Flask, requests, jsonify
 from data import products  # Import from the neutral data file
 import random
-import requests
-
 
 #----APP INIT----
 app = Flask(__name__)

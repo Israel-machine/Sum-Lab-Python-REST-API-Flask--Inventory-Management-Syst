@@ -23,7 +23,12 @@ def main():
     del_parser = subparsers.add_parser("delete", help="Delete a product")
     del_parser.add_argument("--id", required=True, help="Product ID/Barcode")
 
+    ##New Parse added##
+    fetch_parser = subparsers.add_parser("fetch", help="Fetch product details via barcode")
+    fetch_parser.add_argument("--barcode", required=True, help="The barcode to search")
+
     args = parser.parse_args()
+
 
     if args.command == "list":
         response = requests.get(BASE_URL)
@@ -55,6 +60,16 @@ def main():
             console.print(f"[yellow]Product {args.id} deleted.[/yellow]")
         else:
             console.print(f"[red]Error: Product not found.[/red]")
+
+    ##New ELIF
+    elif args.command == "fetch":
+        response = requests.post(f"{BASE_URL}/fetch/{args.barcode}")
+        if response.status_code == 201:
+            data = response.json()
+            console.print(f"[green]Fetched and added:[/green] {data['name']} ({data['brands']})")
+        else:
+            error = response.json().get("error", "Unknown error")
+            console.print(f"[red]Error:[/red] {error}")
 
     else:
         parser.print_help()
