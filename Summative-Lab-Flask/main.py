@@ -23,6 +23,12 @@ def main():
     del_parser = subparsers.add_parser("delete", help="Delete a product")
     del_parser.add_argument("--id", required=True, help="Product ID/Barcode")
 
+    ### Edit/Update a product
+    edit_parser = subparsers.add_parser("edit", help="Edit an existing product")
+    edit_parser.add_argument("--id", required=True, help="The Code/ID of the product to edit")
+    edit_parser.add_argument("--name", help="New name for the product")
+    edit_parser.add_argument("--price", type=float, help="New price for the product")
+
     ##New Parse added##
     fetch_parser = subparsers.add_parser("fetch", help="Fetch product details via barcode")
     fetch_parser.add_argument("--barcode", required=True, help="The barcode to search")
@@ -60,6 +66,29 @@ def main():
             console.print(f"[yellow]Product {args.id} deleted.[/yellow]")
         else:
             console.print(f"[red]Error: Product not found.[/red]")
+
+    ##update
+    elif args.command == "edit":
+        # We only send the data the user actually provided
+        payload = {}
+        if args.name:
+            payload["name"] = args.name
+        if args.price is not None:
+            payload["price"] = args.price
+
+        if not payload:
+            console.print("[yellow]No changes provided. Use --name or --price to update.[/yellow]")
+            return
+
+        response = requests.patch(f"{BASE_URL}/{args.id}", json=payload)
+        
+        if response.status_code == 200:
+            data = response.json()
+            console.print(f"[green]Successfully updated product {args.id}:[/green]")
+            console.print(f"Name: {data['name']} | Price: ${data['price']:.2f}")
+        else:
+            error = response.json().get("error", "Product not found")
+            console.print(f"[red]Error:[/red] {error}")
 
     ##New ELIF
     elif args.command == "fetch":
