@@ -1,14 +1,15 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, requests
 from data import products  # Import from the neutral data file
 import random
+import requests
 
 
 #----APP INIT----
 app = Flask(__name__)
 
+
 #Event Class:
 class Product:
-# Generates a 14-digit integer and converts to string
     def __init__(self, name, brands, price):
         self.code = ''.join([str(random.randint(0, 9)) for _ in range(14)])
         self.name = name
@@ -24,6 +25,42 @@ class Product:
             "price": self.price
         }
 
+def fetch_from_openfoodfacts(barcode):
+    url = f"https://world.openfoodfacts.org/api/v0/product/{barcode}.json"
+    try:
+        response = requests.get(url, timeout=5)
+        if response.status_code == 200:
+            data = response.json()
+            if data.get("status") == 1:
+                product = data["product"]
+                return {
+                    "name": product.get("product_name", "Unknown"),
+                    "brands": product.get("brands", "Unknown")
+                }
+    except Exception as e:
+        print(f"External API Error: {e}")
+    return None
+
+@app.route("/inventory/fetch/<barcode>", methods=["POST"])
+def fetch_and_add_product(barcode):
+    if any(p["code"] == barcode for p in products):
+        return jsonify({"error": "Product already in inventory"}), 400
+
+    external_data = fetch_from_openfoodfacts(barcode)
+    
+    if external_data:
+        new_product = {
+            "code": barcode,
+            "product": {"id": barcode},
+            "name": external_data["name"],
+            "brands": external_data["brands"],
+            "price": 0.0  # Set a default price
+        }
+        products.append(new_product)
+        return jsonify(new_product), 201
+    
+    return jsonify({"error": "Product not found in OpenFoodFacts"}), 404
+
 #---RESTFUL ROUTES----:
 # GET /inventory → Fetch all items
 @app.route("/inventory", methods=["GET"])
@@ -37,7 +74,7 @@ def get_event(id):
     if product:
         return jsonify(product), 200
     else:
-        return ({"Product now found"}), 404
+        return jsonify({"error": "Product not found"}), 404
 
 # POST /inventory → Add a new item
 @app.route("/inventory", methods=["POST"])
