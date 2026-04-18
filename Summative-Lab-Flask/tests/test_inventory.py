@@ -18,7 +18,7 @@ class TestInventory(unittest.TestCase):
         res = self.client.post("/inventory", json=payload)
         self.assertEqual(res.status_code, 201)
         self.assertEqual(res.json['name'], "Dynamic Apple")
-        self.assertIn('code', res.json) # Verify a code was generated automatically
+        self.assertIn('code', res.json)
 
     def test_update_product(self):
         """Scenario: Edit/Update Item (Dynamic)"""
